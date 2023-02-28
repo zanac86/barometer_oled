@@ -61,16 +61,10 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 // 15min = 900 seconds
 #define SECONDS_READ_PRESSURE      30
-#define SECONDS_CHANGE_DISPLAY     8
 #define SECONDS_UPDATE_HISTORY     900
 
-//#define SECONDS_READ_PRESSURE      1
-//#define SECONDS_CHANGE_DISPLAY     1
-//#define SECONDS_UPDATE_HISTORY     1
-
-//900
-//#define SECONDS_CHANGE_DISPLAY    30
-//#define SECONDS_UPDATE_HISTORY   900
+//#define SECONDS_READ_PRESSURE      2
+//#define SECONDS_UPDATE_HISTORY     2
 #define SECONDS_PER_HOUR         3600
 /* USER CODE END Private defines */
 

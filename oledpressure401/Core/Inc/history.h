@@ -16,11 +16,7 @@
 
 
  */
-
-// количество записей для интервала расчета тренда
-#define RECORDS_PER_TREND_INTERVAL 12
-
-#define HISTORY_LEN 48
+#define HISTORY_LEN 24
 // Main history buffer
 extern int32_t History[HISTORY_LEN];
 // Only diffs
@@ -33,7 +29,6 @@ void init_history();
 /// temperature*100 = 2734 = 27.34 °C
 void append_measure_to_history(int32_t pressure);
 void set_now_pressure(int32_t pressure);
-void forecast();
 
 /*
  * 1. min-max range < +-2mm 133 -> no change 0
