@@ -51,7 +51,10 @@ I2C_HandleTypeDef hi2c2;
 TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
+// 93300 - 933 hpa
 int32_t pressure = 0;
+// 2100 - 21°C
+int32_t temperature = 0;
 BMP280_HandleTypedef bmp280;
 
 // read new measure every 1 sec
@@ -88,8 +91,8 @@ void init_my_devices()
 {
 	HAL_Delay(500);
 	OLED_Init(&hi2c1);
-	OLED_FontSet(Font_MSX_6x8_eng);
-	OLED_SetContrast(2);
+	OLED_FontSet(Font_MSX_6x8_rus1251);
+	OLED_SetContrast(64);
 
 	OLED_Clear(0);
 
@@ -105,7 +108,7 @@ void init_my_devices()
 	{
 		OLED_DrawStr("NO BMP", 64, 0, 1);
 		OLED_UpdateScreen();
-		HAL_Delay(1000);
+		HAL_Delay(2000);
 	}
 	else
 	{
@@ -132,7 +135,7 @@ void init_my_devices()
 	OLED_DrawStr(str, 64, 24, 1);
 	OLED_UpdateScreen();
 
-	HAL_Delay(3000);
+	HAL_Delay(1000);
 
 	init_history();
 }
@@ -143,6 +146,7 @@ void read_measure()
 	uint32_t p, h;
 	bmp280_read_fixed(&bmp280, &t, &p, &h);
 	pressure = (int32_t) (p >> 8);
+	temperature = t;
 
 	if (pressure < MIN_PRESSURE) // 700mmHg
 	{
@@ -164,14 +168,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void process_first_time_measure()
 {
-	for (uint16_t i = 0; i < 3; i++)
+	for (uint16_t i = 0; i < 2; i++)
 	{
 		HAL_Delay(200);
 		read_measure();
 	}
-	append_measure_to_history(pressure);
-	set_now_pressure(pressure);
-	display(1);
+	append_measure_to_history(pressure, temperature);
+	set_now_pressure(pressure, temperature);
+	display();
 
 }
 
@@ -181,14 +185,19 @@ void process_timer_event()
 	if ((seconds % SECONDS_READ_PRESSURE) == 0)
 	{
 		read_measure();
-		set_now_pressure(pressure);
-		display(0);
+		set_now_pressure(pressure, temperature);
+		display();
 	}
 	if ((seconds % SECONDS_UPDATE_HISTORY) == 0)
 	{
-		append_measure_to_history(pressure);
-		display(1);
+		append_measure_to_history(pressure, temperature);
 	}
+	if ((seconds % SECONDS_CHANGE_DISPLAY) == 0)
+	{
+		change_display_mode();
+		display();
+	}
+
 }
 
 /* USER CODE END 0 */
@@ -268,6 +277,7 @@ void SystemClock_Config(void)
 	 */
 	__HAL_RCC_PWR_CLK_ENABLE();
 	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+
 	/** Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
 	 */
@@ -279,6 +289,7 @@ void SystemClock_Config(void)
 	{
 		Error_Handler();
 	}
+
 	/** Initializes the CPU, AHB and APB buses clocks
 	 */
 	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
@@ -310,7 +321,7 @@ static void MX_I2C1_Init(void)
 
 	/* USER CODE END I2C1_Init 1 */
 	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 400000;
+	hi2c1.Init.ClockSpeed = 100000;
 	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
 	hi2c1.Init.OwnAddress1 = 0;
 	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -344,7 +355,7 @@ static void MX_I2C2_Init(void)
 
 	/* USER CODE END I2C2_Init 1 */
 	hi2c2.Instance = I2C2;
-	hi2c2.Init.ClockSpeed = 400000;
+	hi2c2.Init.ClockSpeed = 100000;
 	hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
 	hi2c2.Init.OwnAddress1 = 0;
 	hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -383,9 +394,9 @@ static void MX_TIM3_Init(void)
 
 	/* USER CODE END TIM3_Init 1 */
 	htim3.Instance = TIM3;
-	htim3.Init.Prescaler = 15999;
+	htim3.Init.Prescaler = 16000 - 1;
 	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim3.Init.Period = 1000;
+	htim3.Init.Period = 1000 - 1;
 	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -416,10 +427,14 @@ static void MX_TIM3_Init(void)
  */
 static void MX_GPIO_Init(void)
 {
+	/* USER CODE BEGIN MX_GPIO_Init_1 */
+	/* USER CODE END MX_GPIO_Init_1 */
 
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
+	/* USER CODE BEGIN MX_GPIO_Init_2 */
+	/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -457,5 +472,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

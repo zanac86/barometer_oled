@@ -8,8 +8,8 @@
 typedef const uint8_t fontdatatype;
 typedef enum
 {
-    NORMAL  = 0,
-    INVERT  = 1
+    NORMAL = 0,
+    INVERT = 1
 } OLEDinverted;
 
 typedef enum
@@ -31,7 +31,7 @@ typedef struct
 
 extern font_t Font;
 
-extern fontdatatype Font_MSX_6x8_eng[];
+extern fontdatatype Font_MSX_6x8_rus1251[];
 
 void OLED_FontSet(const uint8_t* font);
 
