@@ -68,7 +68,7 @@ void draw_p_t()
 	sprintf(buf1, "%3.0f", p2);
 	OLED_DrawStrZoom(buf1, OLED_RIGHT, 2, 1, 2);
 
-	sprintf(buf1, "kPa    %4.1fCC    mmHg", t);
+	sprintf(buf1, "hPa    %4.1fCC    mmHg", t);
 	*(uint8_t*) (buf1 + 11) = 0xb8;
 	OLED_DrawStrZoom(buf1, OLED_CENTER, 24, 1, 1);
 }
